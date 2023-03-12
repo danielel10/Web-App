@@ -54,7 +54,7 @@ def single_Mol(mol_id):
 
 def remove_mol(mol_id):
     for mol in molecules:
-        if mol['id'] == molש_id:
+        if mol['id'] == mol_id:
             molecules.remove(mol)
             return True
     return False
