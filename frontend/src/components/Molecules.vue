@@ -4,14 +4,16 @@
         <div class="col-sm-10">
           <h1>Molecules</h1>
           <hr><br><br>
-          <button type="button" class="btn btn-success btn-sm"
-                  v-b-modal.molecule-modal>Add Molecule</button>
-          <br><br>
+          <button type="button" class="btn btn-success btn-sm" @click="openFilePicker">
+              Import Molecule file
+          </button>
+            <input type="file" ref="fileInput" style="display: none" @change="onFileChange">
+
           <table class="table table-hover">
             <thead>
               <tr>
-                <th scope="col">fName</th>
-                <th scope="col">Mass</th>
+                <th scope="col">Molecule Name</th>
+                <th scope="col">Burried Volume</th>
                 <th scope="col">Plot?</th>
                 <th></th>
               </tr>
@@ -33,42 +35,6 @@
           </table>
         </div>
       </div>
-      <b-modal ref="addMoleculeModal"
-               id="molecule-modal"
-               title="Add a new molecule"
-               hide-footer>
-          <b-form @submit="onSubmit" @reset="onReset" class="w-100">
-          <b-form-group id="form-fName-group"
-                      label="fName:"
-                      label-for="form-fName-input">
-            <b-form-input id="form-fName-input"
-                          type="text"
-                          v-model="addMoleculeForm.fName"
-                          required
-                          placeholder="Enter name">
-            </b-form-input>
-          </b-form-group>
-          <b-form-group id="form-Mass-group"
-                        label="Mass:"
-                        label-for="form-Mass-input">
-              <b-form-input id="form-Mass-input"
-                            type="text"
-                            v-model="addMoleculeForm.Mass"
-                            required
-                            placeholder="Enter mass">
-              </b-form-input>
-          </b-form-group>
-          <b-form-group id="form-plot-group">
-            <b-form-checkbox-group v-model="addMoleculeForm.plot" id="form-checks">
-              <b-form-checkbox value="true">plot?</b-form-checkbox>
-            </b-form-checkbox-group>
-          </b-form-group>
-          <b-button-group>
-            <b-button type="submit" variant="primary">Submit</b-button>
-            <b-button type="reset" variant="danger">Reset</b-button>
-          </b-button-group>
-        </b-form>
-      </b-modal>
     </div>
   </template>
   
@@ -144,10 +110,42 @@
         this.getmolecules();
         });
       },
-// Handle Delete Button
-deleteMol(mol) {
-  this.removeMol(mol.id);
-},
+    // Handle Delete Button
+      deleteMol(mol) {
+        this.removeMol(mol.id);
+      },
+      //Handle the file choosing
+      openFilePicker() {
+        this.$refs.fileInput.click();
+      },
+      onFileChange(event) {
+        const file = event.target.files[0];
+        const reader = new FileReader();
+        reader.onload = () => {
+          // Parse the contents of the file
+          const lines = reader.result.split('\n');
+          const numAtoms = parseInt(lines[0]);
+          const name = lines[1].trim();
+          const atoms = [];
+          for (let i = 2; i < lines.length; i++) {
+            const [symbol, x, y, z] = lines[i].trim().split(/\s+/);
+            atoms.push({ symbol, x: parseFloat(x), y: parseFloat(y), z: parseFloat(z) });
+          }
+          const molecule = { fname: name, 
+            Atoms: atoms };
+          
+          // Send the molecule to the backend
+          axios.post('http://localhost:5000/Molecules', molecule)
+            .then(response => {
+              this.getmolecules();
+            })
+            .catch(error => {
+              this.getmolecules();
+            });
+        };
+        reader.readAsText(file);
+      }
+
     },
     created() {
       this.getmolecules();
