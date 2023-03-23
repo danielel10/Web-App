@@ -68,7 +68,6 @@ def remove_mol(mol_id):
 
 
 # buried volume calculation
-import numpy as np
 
 def calculate_buried_volume(coords):
     # Calculate the centroid of the molecule
