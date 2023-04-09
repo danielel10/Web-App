@@ -3,6 +3,10 @@ from flask_cors import CORS
 from flask import Flask, jsonify, request
 import numpy as np
 import uuid
+from morfeus import BuriedVolume, read_xyz
+import tempfile
+
+
 
 # configuration
 DEBUG = True
@@ -31,20 +35,32 @@ molecules = [
 def all_molecules():
     response_object = {'status': 'success'}
     if request.method == 'POST':
-        post_data = request.get_json()
-        # add the molecule
-        # Get the coordinates from the dictionary
-        coords = [[atom['x'], atom['y'], atom['z']] for atom in post_data['Atoms']]
-        # Convert the coordinates to a numpy array
-        coords_array = np.array(coords)
-        burried_volume = calculate_buried_volume(coords_array)
-        molecules.append({
-            'id' : uuid.uuid4().hex,
-            'fName': post_data.get('fname'),
-            'Mass': burried_volume,
-            'Plot': True
-        })
-        response_object['message'] = 'molecule added!'
+        file = request.files['file']
+        file_content = file.read()  # read the contents of the uploaded file
+        with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+            temp_file.write(file_content)
+            temp_file_path = temp_file.name
+            temp_file.read()
+            with open(temp_file_path, 'r') as xyz_file:
+                lines = xyz_file.readlines()
+                molecule_name = lines[1].strip()
+                
+            
+                # print(temp_file.read())
+                elements, coordinates = read_xyz(temp_file_path)
+
+                # Create a BuriedVolume object
+                bv = BuriedVolume(elements, coordinates, 50, excluded_atoms=[47,48, 49, 50, 51, 52])
+
+                # Get the fraction of buried volume
+                fraction_buried_volume = bv.fraction_buried_volume
+                molecules.append({
+                    'id' : uuid.uuid4().hex,
+                    'fName': molecule_name,
+                    'Mass': fraction_buried_volume,
+                    'Plot': True
+                })
+                response_object['message'] = 'molecule added!'
     else:
         response_object['molecules'] = molecules
     return jsonify(response_object)
@@ -54,7 +70,6 @@ def all_molecules():
 def single_Mol(mol_id):
     response_object = {'status':'succss'}
     if request.method == 'DELETE':
-        print(mol_id)
         remove_mol(mol_id)
         response_object['message'] = 'molecule Removed!'
     return jsonify(response_object)
@@ -67,46 +82,12 @@ def remove_mol(mol_id):
     return False
 
 
-# buried volume calculation
+#calculate buried volume
 
-def calculate_buried_volume(coords):
-    # Calculate the centroid of the molecule
-    centroid = np.mean(coords, axis=0)
-
-    # Choose a bounding box that contains the molecule
-    min_x = np.min(coords[:,0])
-    max_x = np.max(coords[:,0])
-    min_y = np.min(coords[:,1])
-    max_y = np.max(coords[:,1])
-    min_z = np.min(coords[:,2])
-    max_z = np.max(coords[:,2])
-
-    # Choose a set of random points inside the bounding box
-    num_points = 10000
-    points = np.random.uniform(low=[min_x, min_y, min_z], high=[max_x, max_y, max_z], size=(num_points, 3))
-
-    # Calculate the number of points inside the molecule
-    num_inside = 0
-    for point in points:
-        if is_point_inside_molecule(point, coords):
-            num_inside += 1
-
-    # Calculate the volume of the molecule
-    volume = (num_inside / num_points) * ((max_x - min_x) * (max_y - min_y) * (max_z - min_z))
-
-    return volume
-
-def is_point_inside_molecule(point, coords):
-    # Check if the point is inside the molecule using the ray casting algorithm
-    # Adapted from: https://wrf.ecse.rpi.edu//Research/Short_Notes/pnpoly.html
-    num_vertices = len(coords)
-    inside = False
-    for i in range(num_vertices):
-        j = (i + 1) % num_vertices
-        if ((coords[i,1] > point[1]) != (coords[j,1] > point[1])) and \
-           (point[0] < (coords[j,0] - coords[i,0]) * (point[1] - coords[i,1]) / (coords[j,1] - coords[i,1]) + coords[i,0]):
-            inside = not inside
-    return inside
+def calculate_buried_volume():
+    elements, coordinates = read_xyz("backend\2.xyz")
+    bv = BuriedVolume(elements, coordinates, 50)
+    return bv
 
 
 if __name__ == '__main__':

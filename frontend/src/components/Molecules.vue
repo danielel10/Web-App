@@ -12,7 +12,7 @@
           <table class="table table-hover">
             <thead>
               <tr>
-                <th scope="col">Molecule Name</th>
+                <th scope="col">Comment</th>
                 <th scope="col">Burried Volume</th>
                 <th scope="col">Plot?</th>
                 <th></th>
@@ -120,30 +120,18 @@
       },
       onFileChange(event) {
         const file = event.target.files[0];
-        const reader = new FileReader();
-        reader.onload = () => {
-          // Parse the contents of the file
-          const lines = reader.result.split('\n');
-          const numAtoms = parseInt(lines[0]);
-          const name = lines[1].trim();
-          const atoms = [];
-          for (let i = 2; i < lines.length; i++) {
-            const [symbol, x, y, z] = lines[i].trim().split(/\s+/);
-            atoms.push({ symbol, x: parseFloat(x), y: parseFloat(y), z: parseFloat(z) });
-          }
-          const molecule = { fname: name, 
-            Atoms: atoms };
-          
+        const formData = new FormData()
+        formData.append('file', file)
           // Send the molecule to the backend
-          axios.post('http://localhost:5000/Molecules', molecule)
+          axios.post('http://localhost:5000/Molecules', formData , {headers: {
+          'Content-Type': 'multipart/form-data'
+        }})
             .then(response => {
               this.getmolecules();
             })
             .catch(error => {
               this.getmolecules();
-            });
-        };
-        reader.readAsText(file);
+            }); 
       }
 
     },
