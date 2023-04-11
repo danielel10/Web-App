@@ -4,7 +4,7 @@
         <div class="col-sm-10">
           <h1>Molecules</h1>
           <hr><br><br>
-          <button type="button" class="btn btn-success btn-sm" @click="openFilePicker">
+          <button type="button" class="btn btn-success btn-sm" v-b-modal.import-modal>
               Import Molecule file
           </button>
             <input type="file" ref="fileInput" style="display: none" @change="onFileChange">
@@ -35,6 +35,20 @@
           </table>
         </div>
       </div>
+      <b-modal ref="importMoleculeModal" id="import-modal" title="Import Molecules" hide-footer no-wrap>
+        <b-form @submit="onSubmit" @reset="onReset">
+          <b-form-group id="form-file-group" label="File:" label-for="form-file-input">
+            <b-form-file id="form-file-input" v-model="importMoleculeForm.file" required></b-form-file>
+          </b-form-group>
+          <b-form-group id="form-ignore-group" label="Ignored Molecules:" label-for="form-ignore-input">
+            <b-form-textarea id="form-ignore-input" v-model="importMoleculeForm.ignore" placeholder="Enter molecules to ignore"></b-form-textarea>
+          </b-form-group>
+          <b-button-group>
+            <b-button type="submit" variant="primary">Submit</b-button>
+            <b-button type="reset" variant="danger">Reset</b-button>
+          </b-button-group>
+        </b-form>
+      </b-modal>
     </div>
   </template>
   
@@ -44,10 +58,9 @@
     data() {
       return {
         molecules: [],
-        addMoleculeForm: {
-          fName: '',
-          Mass: '',
-          plot: [],
+        importMoleculeForm: {
+        file: null,
+        ignore: ''
         },
       };
     },
@@ -63,41 +76,36 @@
             console.error(error);
           });
       },
-      addMolecule(payload) {
-        const path = 'http://localhost:5000/Molecules';
-        axios.post(path, payload)
-          .then(() => {
-            this.getmolecules();
-          })
-          .catch((error) => {
-            // eslint-disable-next-line
-            console.log(error);
-            this.getmolecules();
-          });
-      },
       initForm() {
-        this.addMoleculeForm.fName = '';
-        this.addMoleculeForm.Mass = '';
-        this.addMoleculeForm.plot = [];
+        this.importMoleculeForm.file = null;
+        this.importMoleculeForm.ignore = '';
       },
       onSubmit(evt) {
         evt.preventDefault();
-        this.$refs.addMoleculeModal.hide();
-        let plot = false;
-        if (this.addMoleculeForm.plot[0]) plot = true;
-        const payload = {
-          fName: this.addMoleculeForm.fName,
-          Mass: this.addMoleculeForm.Mass,
-          plot, // property shorthand
-        };
-        this.addMolecule(payload);
+        this.$refs.importMoleculeModal.hide();
+        const file = this.importMoleculeForm.file;
+        const formData = new FormData();
+        const numToIgnoreList = this.importMoleculeForm.ignore.split(',').map(Number);
+        formData.append('numToIgnoreList', JSON.stringify(numToIgnoreList));
+        formData.append('file', file)
+          // Send the molecule to the backend
+          axios.post('http://localhost:5000/Molecules', formData , {headers: {
+          'Content-Type': 'multipart/form-data'
+        }})
+            .then(response => {
+              this.getmolecules();
+            })
+            .catch(error => {
+              this.getmolecules();
+            });
         this.initForm();
       },
       onReset(evt) {
         evt.preventDefault();
-        this.$refs.addMoleculeModal.hide();
         this.initForm();
       },
+
+      //action of deleting the molecule
       removeMol(molId) {
         const path = `http://localhost:5000/${molId}`;
         axios.delete(path)
@@ -110,14 +118,13 @@
         this.getmolecules();
         });
       },
+
     // Handle Delete Button
       deleteMol(mol) {
         this.removeMol(mol.id);
       },
+
       //Handle the file choosing
-      openFilePicker() {
-        this.$refs.fileInput.click();
-      },
       onFileChange(event) {
         const file = event.target.files[0];
         const formData = new FormData()

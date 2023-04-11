@@ -52,7 +52,7 @@ def all_molecules():
                 elements, coordinates = read_xyz(temp_file_path)
 
                 # Create a BuriedVolume object
-                bv = BuriedVolume(elements, coordinates, 50, excluded_atoms)
+                bv = BuriedVolume(elements, coordinates, 47, excluded_atoms)
 
                 # Get the fraction of buried volume
                 fraction_buried_volume = bv.fraction_buried_volume
