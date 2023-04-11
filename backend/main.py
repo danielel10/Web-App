@@ -8,7 +8,14 @@ import tempfile
 import json
 
 
+# List of all metallic element symbols
+Metallic_atoms = ['Ac', 'Al', 'Sb', 'Ag', 'Ba', 'Bi', 'Bh', 'B', 'Cd', 'Ca', 'Cf', 'Cr', 'Co', 'Cm',
+                   'Ds', 'Db', 'Dy', 'Fr', 'Gd', 'Ga', 'Au', 'Hf', 'Hs', 'Ho', 'Ir', 'Fe', 'Kr', 'La',
+                     'Li', 'Mc', 'Nh', 'Nb', 'N', 'Os', 'Pd', 'P', 'Pt', 'Pu', 'Po', 'K', 'Pa', 'Ra',
+                       'Rn', 'Re', 'Rh', 'Rb', 'Sm', 'Sc', 'Si', 'Na', 'Sr', 'Ta', 'Tl', 'Th', 'Tm',
+                         'Sn', 'Ti', 'U', 'V', 'Y', 'Zn', 'Zr']
 
+ 
 # configuration
 DEBUG = True
 
@@ -23,12 +30,7 @@ CORS(app, resources={r'/*': {'origins': '*'}})
 
 
 molecules = [
-    {   
-        'id' : uuid.uuid4().hex,
-        'fName': 'On the Road',
-        'Mass': 'Jack Kerouac',
-        'Plot': True
-    },
+    
 ]
 
 
@@ -50,9 +52,14 @@ def all_molecules():
             
                 # print(temp_file.read())
                 elements, coordinates = read_xyz(temp_file_path)
+                metal_index = 0
+                for i in range(len(elements)):
+                    if elements[i] in Metallic_atoms:
+                        metal_index = i
+                    continue
 
                 # Create a BuriedVolume object
-                bv = BuriedVolume(elements, coordinates, 47, excluded_atoms)
+                bv = BuriedVolume(elements, coordinates, metal_index, excluded_atoms)
 
                 # Get the fraction of buried volume
                 fraction_buried_volume = bv.fraction_buried_volume
@@ -82,15 +89,6 @@ def remove_mol(mol_id):
             molecules.remove(mol)
             return True
     return False
-
-
-#calculate buried volume
-
-def calculate_buried_volume():
-    elements, coordinates = read_xyz("backend\2.xyz")
-    bv = BuriedVolume(elements, coordinates, 50)
-    return bv
-
 
 if __name__ == '__main__':
     app.run()
