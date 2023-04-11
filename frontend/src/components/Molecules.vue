@@ -35,7 +35,8 @@
           </table>
         </div>
       </div>
-      <b-modal ref="importMoleculeModal" id="import-modal" title="Import Molecules" hide-footer no-wrap>
+      <b-modal ref="importMoleculeModal" id="import-modal" title="Import Molecules" 
+        hide-footer>
         <b-form @submit="onSubmit" @reset="onReset">
           <b-form-group id="form-file-group" label="File:" label-for="form-file-input">
             <b-form-file id="form-file-input" v-model="importMoleculeForm.file" required></b-form-file>
@@ -151,3 +152,9 @@
     },
   };
   </script>
+
+<style>
+.modal-backdrop {
+  background-color: rgba(221, 221, 221, 0.5) !important;
+}
+</style>
