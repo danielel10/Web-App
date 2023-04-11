@@ -121,6 +121,9 @@
       onFileChange(event) {
         const file = event.target.files[0];
         const formData = new FormData()
+        const numToIgnore = prompt("Enter a comma-separated list of molecules to ignore:", "");
+        const numToIgnoreList = numToIgnore.split(',').map(Number);
+        formData.append('numToIgnoreList', JSON.stringify(numToIgnoreList));
         formData.append('file', file)
           // Send the molecule to the backend
           axios.post('http://localhost:5000/Molecules', formData , {headers: {
@@ -132,6 +135,7 @@
             .catch(error => {
               this.getmolecules();
             }); 
+        this.$refs.fileInput.value = null;
       }
 
     },

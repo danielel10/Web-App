@@ -5,6 +5,7 @@ import numpy as np
 import uuid
 from morfeus import BuriedVolume, read_xyz
 import tempfile
+import json
 
 
 
@@ -36,6 +37,7 @@ def all_molecules():
     response_object = {'status': 'success'}
     if request.method == 'POST':
         file = request.files['file']
+        excluded_atoms = json.loads(request.form['numToIgnoreList'])
         file_content = file.read()  # read the contents of the uploaded file
         with tempfile.NamedTemporaryFile(delete=False) as temp_file:
             temp_file.write(file_content)
@@ -50,7 +52,7 @@ def all_molecules():
                 elements, coordinates = read_xyz(temp_file_path)
 
                 # Create a BuriedVolume object
-                bv = BuriedVolume(elements, coordinates, 50, excluded_atoms=[47,48, 49, 50, 51, 52])
+                bv = BuriedVolume(elements, coordinates, 50, excluded_atoms)
 
                 # Get the fraction of buried volume
                 fraction_buried_volume = bv.fraction_buried_volume
