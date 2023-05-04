@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify , send_file
 from flask_cors import CORS
 from flask import Flask, jsonify, request
 import numpy as np
@@ -6,6 +6,10 @@ import uuid
 from morfeus import BuriedVolume, read_xyz
 import tempfile
 import json
+import shutil
+import os
+
+
 
 
 # List of all metallic element symbols
@@ -22,6 +26,7 @@ DEBUG = True
 # instantiate the app
 app = Flask(__name__)
 app.config.from_object(__name__)
+app.config['FLASK_DEBUG'] = True
 
 # enable CORS
 CORS(app, resources={r'/*': {'origins': '*'}})
@@ -59,15 +64,20 @@ def all_molecules():
                     continue
 
                 # Create a BuriedVolume object
-                bv = BuriedVolume(elements, coordinates, metal_index, excluded_atoms)
-
+                bv = BuriedVolume(elements, coordinates, metal_index, excluded_atoms, z_axis_atoms=[2])
                 # Get the fraction of buried volume
                 fraction_buried_volume = bv.fraction_buried_volume
+
+                id = uuid.uuid4().hex
+                plot_id = f"plot_{id}.png"
+                bv.plot_steric_map(filename = plot_id)
+
+                shutil.move(plot_id, "backend/plots/")
+
                 molecules.append({
-                    'id' : uuid.uuid4().hex,
+                    'id' : id,
                     'fName': molecule_name,
                     'Mass': fraction_buried_volume,
-                    'Plot': True
                 })
                 response_object['message'] = 'molecule added!'
     else:
@@ -75,17 +85,27 @@ def all_molecules():
     return jsonify(response_object)
 
 #PUT and DELETE route handler
-@app.route('/<mol_id>', methods=['PUT','DELETE'])
+@app.route('/<mol_id>', methods=['GET','DELETE'])
 def single_Mol(mol_id):
     response_object = {'status':'succss'}
+    # delete the mol
     if request.method == 'DELETE':
         remove_mol(mol_id)
         response_object['message'] = 'molecule Removed!'
+
+    # Send the file in the response
+    elif request.method == "GET":
+        plot_path = "backend/plots/plot_" + mol_id + ".png"
+        if os.path.isfile(plot_path):
+            return send_file(plot_path, mimetype='image/png')
     return jsonify(response_object)
 
 def remove_mol(mol_id):
     for mol in molecules:
         if mol['id'] == mol_id:
+            plot_path = "backend/plots/plot_" + mol_id + ".png"
+            if os.path.exists(plot_path):
+                os.remove(plot_path)
             molecules.remove(mol)
             return True
     return False
