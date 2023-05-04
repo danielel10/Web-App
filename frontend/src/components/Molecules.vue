@@ -27,7 +27,7 @@
                 <!-- Plot button -->
                 <td>
                   <div class="btn-group" role="group">
-                    <img :src="plotImage" class="plot-image">
+                    
                     <button type="button" class="btn btn-primary btn-sm" @click="showPlot(molecule)">Show Plot</button>
                   </div>
                 </td>
