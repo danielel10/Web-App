@@ -54,6 +54,9 @@
         <b-form-group id="form-ignore-group" label="Excluded atoms:" label-for="form-ignore-input">
           <b-form-textarea id="form-ignore-input" v-model="importMoleculeForm.ignore" placeholder="Enter atoms to ignore"></b-form-textarea>
         </b-form-group>
+        <b-form-group id="form-zaxis-group" label="Z axis atoms:" label-for="form-zaxis-input">
+          <b-form-textarea id="form-zaxis-input" v-model="importMoleculeForm.zaxis" placeholder="Enter z axis atoms for plotting"></b-form-textarea>
+        </b-form-group>
         <b-button-group>
           <b-button type="submit" variant="primary">Submit</b-button>
           <b-button type="reset" variant="danger">Reset</b-button>
@@ -85,7 +88,8 @@ export default {
       molecules: [],
       importMoleculeForm: {
       file: null,
-      ignore: ''
+      ignore: '',
+      zaxis: ''
       },
     };
   },
@@ -104,14 +108,17 @@ export default {
     initForm() {
       this.importMoleculeForm.file = null;
       this.importMoleculeForm.ignore = '';
+      this.importMoleculeForm.zaxis = '';
     },
     onSubmit(evt) {
-      evt.preventDefault();
+      evt.preventDefault( );
       this.$refs.importMoleculeModal.hide();
       const file = this.importMoleculeForm.file;
       const formData = new FormData();
       const numToIgnoreList = this.importMoleculeForm.ignore.split(',').map(Number);
+      const zaxisatoms = this.importMoleculeForm.zaxis.split(',').map(Number);
       formData.append('numToIgnoreList', JSON.stringify(numToIgnoreList));
+      formData.append('zaxisatoms', JSON.stringify(zaxisatoms));
       formData.append('file', file)
         // Send the molecule to the backend
         axios.post('http://localhost:5000/Molecules', formData , {headers: {

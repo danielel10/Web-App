@@ -45,6 +45,7 @@ def all_molecules():
     if request.method == 'POST':
         file = request.files['file']
         excluded_atoms = json.loads(request.form['numToIgnoreList'])
+        zaxis_atoms = json.loads(request.form['zaxisatoms'])
         file_content = file.read()  # read the contents of the uploaded file
         with tempfile.NamedTemporaryFile(delete=False) as temp_file:
             temp_file.write(file_content)
@@ -62,17 +63,28 @@ def all_molecules():
                     if elements[i] in Metallic_atoms:
                         metal_index = i
                     continue
+                
+                id = uuid.uuid4().hex
 
-                # Create a BuriedVolume object
-                bv = BuriedVolume(elements, coordinates, metal_index, excluded_atoms, z_axis_atoms=[2])
+                if zaxis_atoms[0] != 0:
+                    # Create a BuriedVolume object
+                    bv = BuriedVolume(elements, coordinates, metal_index, excluded_atoms, z_axis_atoms= zaxis_atoms)
+                    
+                    plot_id = f"plot_{id}.png"
+                    bv.plot_steric_map(filename = plot_id)
+                    shutil.move(plot_id, "backend/plots/")
+                    
+                    
+                else:
+                    bv = BuriedVolume(elements, coordinates, metal_index, excluded_atoms)
                 # Get the fraction of buried volume
                 fraction_buried_volume = bv.fraction_buried_volume
 
-                id = uuid.uuid4().hex
-                plot_id = f"plot_{id}.png"
-                bv.plot_steric_map(filename = plot_id)
+                
+                
+                
 
-                shutil.move(plot_id, "backend/plots/")
+                
 
                 molecules.append({
                     'id' : id,
