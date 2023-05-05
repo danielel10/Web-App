@@ -57,6 +57,9 @@
         <b-form-group id="form-zaxis-group" label="Z axis atoms:" label-for="form-zaxis-input">
           <b-form-textarea id="form-zaxis-input" v-model="importMoleculeForm.zaxis" placeholder="Enter z axis atoms for plotting"></b-form-textarea>
         </b-form-group>
+        <b-form-group id="form-nonmetalic-group" label="If you dont want a metalic ligand enter a new index for the center atom:" label-for="form-nonmetalic-input">
+          <b-form-textarea id="form-nonmetalic-input" v-model="importMoleculeForm.nonmetalic" placeholder="Enter new index for centering"></b-form-textarea>
+        </b-form-group>
         <b-button-group>
           <b-button type="submit" variant="primary">Submit</b-button>
           <b-button type="reset" variant="danger">Reset</b-button>
@@ -89,7 +92,8 @@ export default {
       importMoleculeForm: {
       file: null,
       ignore: '',
-      zaxis: ''
+      zaxis: '',
+      nonmetalic: '',
       },
     };
   },
@@ -109,6 +113,7 @@ export default {
       this.importMoleculeForm.file = null;
       this.importMoleculeForm.ignore = '';
       this.importMoleculeForm.zaxis = '';
+      this.importMoleculeForm.nonmetalic = '';
     },
     onSubmit(evt) {
       evt.preventDefault( );
@@ -117,8 +122,14 @@ export default {
       const formData = new FormData();
       const numToIgnoreList = this.importMoleculeForm.ignore.split(',').map(Number);
       const zaxisatoms = this.importMoleculeForm.zaxis.split(',').map(Number);
+      const nonmetalic = this.importMoleculeForm.nonmetalic.split(',').map(Number);
+      if (nonmetalic == null) {
+        nonmetalic = 20
+
+      }
       formData.append('numToIgnoreList', JSON.stringify(numToIgnoreList));
       formData.append('zaxisatoms', JSON.stringify(zaxisatoms));
+      formData.append('nonmetalic', JSON.stringify(nonmetalic));
       formData.append('file', file)
         // Send the molecule to the backend
         axios.post('http://localhost:5000/Molecules', formData , {headers: {
@@ -200,15 +211,20 @@ background-color: rgba(221, 221, 221, 0.5) !important;
 }
 
 .plot-container {
-width: 100%;
-height: 100%;
-display: flex;
-justify-content: center;
-align-items: center;
+  position: center;
 }
 
-.plot-container > div {
-width: 90%;
-height: 90%;
+#plot-modal .modal-dialog {
+  max-width: none;
+  width: auto;
+  height: auto;
+  margin: auto;
+  position: absolute;
+  top: 50px;
+  left: auto;
+  right: 400px;
+  bottom: auto;
+  z-index: -1;
 }
+
 </style>

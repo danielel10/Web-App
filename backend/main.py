@@ -46,6 +46,7 @@ def all_molecules():
         file = request.files['file']
         excluded_atoms = json.loads(request.form['numToIgnoreList'])
         zaxis_atoms = json.loads(request.form['zaxisatoms'])
+        non_metalic = json.loads(request.form['nonmetalic'])
         file_content = file.read()  # read the contents of the uploaded file
         with tempfile.NamedTemporaryFile(delete=False) as temp_file:
             temp_file.write(file_content)
@@ -56,35 +57,23 @@ def all_molecules():
                 molecule_name = lines[1].strip()
                 
             
-                # print(temp_file.read())
                 elements, coordinates = read_xyz(temp_file_path)
-                metal_index = 0
-                for i in range(len(elements)):
-                    if elements[i] in Metallic_atoms:
-                        metal_index = i
-                    continue
+
+                # this could be the metal atom or another predefined atom by the user
+                center_atom = getcenter(elements,non_metalic)
                 
                 id = uuid.uuid4().hex
 
+                # Create a BuriedVolume object depending on z axios or not
                 if zaxis_atoms[0] != 0:
-                    # Create a BuriedVolume object
-                    bv = BuriedVolume(elements, coordinates, metal_index, excluded_atoms, z_axis_atoms= zaxis_atoms)
-                    
+                    bv = BuriedVolume(elements, coordinates, center_atom, excluded_atoms, z_axis_atoms= zaxis_atoms)
                     plot_id = f"plot_{id}.png"
                     bv.plot_steric_map(filename = plot_id)
                     shutil.move(plot_id, "backend/plots/")
-                    
-                    
                 else:
-                    bv = BuriedVolume(elements, coordinates, metal_index, excluded_atoms)
+                    bv = BuriedVolume(elements, coordinates, center_atom, excluded_atoms)
                 # Get the fraction of buried volume
                 fraction_buried_volume = bv.fraction_buried_volume
-
-                
-                
-                
-
-                
 
                 molecules.append({
                     'id' : id,
@@ -122,6 +111,16 @@ def remove_mol(mol_id):
             molecules.remove(mol)
             return True
     return False
+
+
+def getcenter(elements,non_metalic):
+    if non_metalic[0] != 0:
+        return non_metalic[0]
+    for metal_index in range(len(elements)):
+        if elements[metal_index] in Metallic_atoms:
+            return metal_index
+    return 0
+
 
 if __name__ == '__main__':
     app.run()
