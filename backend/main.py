@@ -85,7 +85,7 @@ def all_molecules():
         response_object['molecules'] = molecules
     return jsonify(response_object)
 
-#PUT and DELETE route handler
+#GET plot and DELETE molecule route handler
 @app.route('/<mol_id>', methods=['GET','DELETE'])
 def single_Mol(mol_id):
     response_object = {'status':'succss'}
@@ -100,6 +100,10 @@ def single_Mol(mol_id):
         if os.path.isfile(plot_path):
             plot_path = "plots\plot_" + mol_id + ".png"
             return send_file(plot_path, mimetype='image/png')
+        else:
+            response_object['status'] = 'failure'
+            response_object['message'] = 'Failed to retrieve plot'
+            return jsonify(response_object), 404
     return jsonify(response_object)
 
 def remove_mol(mol_id):

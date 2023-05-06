@@ -76,6 +76,11 @@
       </div>
     </b-modal>
 
+    <!-- Error notification -->
+    <b-alert v-model="showError" variant="danger" dismissible>
+      {{ errorMessage }}
+    </b-alert>
+
 
 
   </div>
@@ -83,9 +88,12 @@
 
 <script>
 import axios from 'axios';
+import { BIconTextCenter } from 'bootstrap-vue';
 export default {
   data() {
     return {
+      showError: false,
+      errorMessage: '',
       plot: null,
       plotImage: null,
       molecules: [],
@@ -174,8 +182,7 @@ export default {
           return new Blob([response.data], { type: 'image/png' });
         })
         .catch((error) => {
-          console.error(error);
-          this.getmolecules();
+          throw(error);
         });
     },
 
@@ -192,10 +199,17 @@ export default {
           });
         })
         .catch(error => {
-          console.error(error);
-          this.getmolecules();
+          this.errorMessage = 'No plot available as you didnt added z axios atoms';
+          this.showError = true;
+
+          // Hide the error notification after a delay
+          setTimeout(() => {
+            this.showError = false;
+          }, 3500); // Set the delay to 5000 milliseconds (5 seconds)
         });
     },
+
+    
 
   },
   created() {
