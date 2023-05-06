@@ -2,7 +2,7 @@
   <div class="container">
     <div class="row">
       <div class="col-sm-10">
-        <h1>Molecules</h1>
+        <h1>Burried Volume Calculator</h1>
         <hr><br><br>
         <button type="button" class="btn btn-success btn-sm" v-b-modal.import-modal>
             Import Molecule file
@@ -160,6 +160,7 @@ export default {
           });
       this.initForm();
     },
+
     onReset(evt) {
       evt.preventDefault();
       this.initForm();
