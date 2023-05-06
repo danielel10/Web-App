@@ -63,15 +63,15 @@ def all_molecules():
                 center_atom = getcenter(elements,non_metalic)
                 
                 id = uuid.uuid4().hex
-
+                
                 # Create a BuriedVolume object depending on z axios or not
-                if zaxis_atoms[0] != 0:
-                    bv = BuriedVolume(elements, coordinates, center_atom, excluded_atoms, z_axis_atoms= zaxis_atoms)
+                bv = BuriedVolume(elements, coordinates, center_atom, excluded_atoms, z_axis_atoms= zaxis_atoms)
+                
+                # if we want to create a strict map we need zaxis atoms
+                if zaxis_atoms:
                     plot_id = f"plot_{id}.png"
                     bv.plot_steric_map(filename = plot_id)
                     shutil.move(plot_id, "backend/plots/")
-                else:
-                    bv = BuriedVolume(elements, coordinates, center_atom, excluded_atoms)
                 # Get the fraction of buried volume
                 fraction_buried_volume = bv.fraction_buried_volume
 
@@ -114,12 +114,10 @@ def remove_mol(mol_id):
 
 
 def getcenter(elements,non_metalic):
-    if non_metalic[0] != 0:
-        return non_metalic[0]
     for metal_index in range(len(elements)):
         if elements[metal_index] in Metallic_atoms:
             return metal_index
-    return 0
+    return non_metalic[0]
 
 
 if __name__ == '__main__':

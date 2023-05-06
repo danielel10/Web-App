@@ -120,13 +120,12 @@ export default {
       this.$refs.importMoleculeModal.hide();
       const file = this.importMoleculeForm.file;
       const formData = new FormData();
-      const numToIgnoreList = this.importMoleculeForm.ignore.split(',').map(Number);
-      const zaxisatoms = this.importMoleculeForm.zaxis.split(',').map(Number);
-      const nonmetalic = this.importMoleculeForm.nonmetalic.split(',').map(Number);
-      if (nonmetalic == null) {
-        nonmetalic = 20
-
-      }
+      const numToIgnoreList = this.importMoleculeForm.ignore.split(',') == '' ? 
+                            null : this.importMoleculeForm.ignore.split(',').map(Number);
+      const zaxisatoms = this.importMoleculeForm.zaxis.split(',') == '' ? 
+                          null : this.importMoleculeForm.zaxis.split(',').map(Number);
+      const nonmetalic = this.importMoleculeForm.nonmetalic.split(',') == '' ? 
+                            null : this.importMoleculeForm.nonmetalic.split(',').map(Number);
       formData.append('numToIgnoreList', JSON.stringify(numToIgnoreList));
       formData.append('zaxisatoms', JSON.stringify(zaxisatoms));
       formData.append('nonmetalic', JSON.stringify(nonmetalic));
