@@ -9,6 +9,15 @@
         </button>
           
 
+        <br><br>
+        <input
+          type="text"
+          v-model="searchQuery"
+          placeholder="Search by name or buried volume"
+          class="form-control"
+        >
+        <br>
+
         <table class="table table-hover">
           <thead>
             <tr>
@@ -20,7 +29,7 @@
             </tr>
           </thead>
           <tbody>
-              <tr v-for="(molecule, index) in molecules" :key="index">
+              <tr v-for="(molecule, index) in filteredMolecules" :key="index">
                 <td>{{ molecule.fName }}</td>
                 <td>{{ molecule.Mass }}</td>
 
@@ -103,6 +112,7 @@ export default {
       zaxis: '',
       nonmetalic: '',
       },
+      searchQuery: '', // Search query for filtering molecules
     };
   },
   methods: {
@@ -209,9 +219,19 @@ export default {
         });
     },
 
-    
-
   },
+  computed: {
+    filteredMolecules() {
+      const searchTerm = this.searchQuery.toLowerCase();
+      return this.molecules.filter((molecule) => {
+        return (
+          molecule.fName.toLowerCase().includes(searchTerm) ||
+          molecule.Mass.toString().toLowerCase().includes(searchTerm) // Convert to string before comparison
+        );
+      });
+    },
+  },
+
   created() {
     this.getmolecules();
   },
