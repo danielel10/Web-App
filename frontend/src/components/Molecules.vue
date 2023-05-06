@@ -12,7 +12,7 @@
         <table class="table table-hover">
           <thead>
             <tr>
-              <th scope="col">Comment</th>
+              <th scope="col">Name</th>
               <th scope="col">Burried Volume</th>
               <th scope="col">Plot</th>
               <th scope="col">Actions</th>
