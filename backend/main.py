@@ -60,7 +60,13 @@ def all_molecules():
                 elements, coordinates = read_xyz(temp_file_path)
 
                 # this could be the metal atom or another predefined atom by the user
-                center_atom = getcenter(elements,non_metalic)
+                try:
+                    center_atom = getcenter(elements,non_metalic)
+                except Exception as e:
+                    response_object['status'] = 'failure'
+                    response_object['message'] = 'no center provided'
+                    return jsonify(response_object), 404
+                
                 
                 id = uuid.uuid4().hex
                 
@@ -121,6 +127,8 @@ def getcenter(elements,non_metalic):
     for metal_index in range(len(elements)):
         if elements[metal_index] in Metallic_atoms:
             return metal_index
+    if not non_metalic: 
+        raise Exception("   ")
     return non_metalic[0]
 
 

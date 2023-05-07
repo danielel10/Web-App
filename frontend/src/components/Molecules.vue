@@ -156,6 +156,8 @@ export default {
             this.getmolecules();
           })
           .catch(error => {
+            const errorMessage  = "center atom was not provided for a metal-free moluecule"
+            this.errorHandler(errorMessage);
             this.getmolecules();
           });
       this.initForm();
@@ -210,14 +212,21 @@ export default {
           });
         })
         .catch(error => {
-          this.errorMessage = 'No plot available as you didnt added z axios atoms';
-          this.showError = true;
+          const errorMessage = "no z axios atoms provided";
+          this.errorHandler(errorMessage);
+            });
+    },
 
-          // Hide the error notification after a delay
-          setTimeout(() => {
-            this.showError = false;
-          }, 3500); // Set the delay to 5000 milliseconds (5 seconds)
-        });
+    
+    errorHandler(errorMessage) {
+      this.errorMessage = errorMessage;
+      this.showError = true;
+
+      // Hide the error notification after a delay
+      setTimeout(() => {
+        this.showError = false;
+      }, 3500); // Set the delay to 5000 milliseconds (5 seconds)
+        
     },
 
   },
