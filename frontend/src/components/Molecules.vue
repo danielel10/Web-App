@@ -22,7 +22,7 @@
           <thead>
             <tr>
               <th scope="col">Name</th>
-              <th scope="col">Burried Volume</th>
+              <th scope="col">Buried Volume</th>
               <th scope="col">Plot</th>
               <th scope="col">Actions</th>
               <th></th>
