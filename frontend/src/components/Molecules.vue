@@ -83,7 +83,11 @@
       <div class="plot-container">
         <img :src="plotImage">
       </div>
+      <b-button-group>
+        <b-button variant="primary" @click="savePlot">Save</b-button>
+      </b-button-group>
     </b-modal>
+
 
     <!-- Error notification -->
     <b-alert v-model="showError" variant="danger" dismissible>
@@ -127,12 +131,14 @@ export default {
           console.error(error);
         });
     },
+    
     initForm() {
       this.importMoleculeForm.file = null;
       this.importMoleculeForm.ignore = '';
       this.importMoleculeForm.zaxis = '';
       this.importMoleculeForm.nonmetalic = '';
     },
+
     onSubmit(evt) {
       evt.preventDefault( );
       this.$refs.importMoleculeModal.hide();
@@ -229,8 +235,18 @@ export default {
         
     },
 
+    savePlot() {
+      const link = document.createElement('a');
+      link.href = this.plotImage;
+      link.download = 'plot.png';
+      link.target = '_blank';
+      link.click();
+    },
+
   },
   computed: {
+
+    //Search handler function
     filteredMolecules() {
       const searchTerm = this.searchQuery.toLowerCase();
       return this.molecules.filter((molecule) => {
