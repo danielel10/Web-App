@@ -218,7 +218,7 @@ export default {
           });
         })
         .catch(error => {
-          const errorMessage = "no z axios atoms provided";
+          const errorMessage = "no z axis atoms provided";
           this.errorHandler(errorMessage);
             });
     },
