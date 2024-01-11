@@ -104,7 +104,7 @@ def single_Mol(mol_id):
     elif request.method == "GET":
         plot_path = "backend/plots/plot_" + mol_id + ".png"
         if os.path.isfile(plot_path):
-            plot_path = "plots\plot_" + mol_id + ".png" 
+            plot_path = "plots\plot_" + mol_id + ".png"
             return send_file(plot_path, mimetype='image/png')
         else:
             response_object['status'] = 'failure'
