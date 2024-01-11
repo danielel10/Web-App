@@ -162,7 +162,7 @@ export default {
             this.getmolecules();
           })
           .catch(error => {
-            const errorMessage  = "center atom was not provided for a metal-free molecule" + error
+            const errorMessage  = "center atom was not provided for a metal-free moluecule"
             this.errorHandler(errorMessage);
             this.getmolecules();
           });

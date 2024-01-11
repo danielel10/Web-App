@@ -8,8 +8,6 @@ import tempfile
 import json
 import shutil
 import os
-import matplotlib
-matplotlib.use('agg')
 
 
 
@@ -79,7 +77,7 @@ def all_molecules():
                 if zaxis_atoms:
                     plot_id = f"plot_{id}.png"
                     bv.plot_steric_map(filename = plot_id)
-                    shutil.move(plot_id, "plots")
+                    shutil.move(plot_id, "backend/plots/")
                 # Get the fraction of buried volume
                 fraction_buried_volume = bv.fraction_buried_volume
 
@@ -106,7 +104,7 @@ def single_Mol(mol_id):
     elif request.method == "GET":
         plot_path = "backend/plots/plot_" + mol_id + ".png"
         if os.path.isfile(plot_path):
-            plot_path = "plots\plot_" + mol_id 
+            plot_path = "plots\plot_" + mol_id + ".png" 
             return send_file(plot_path, mimetype='image/png')
         else:
             response_object['status'] = 'failure'
