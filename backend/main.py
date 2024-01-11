@@ -95,7 +95,7 @@ def all_molecules():
 @app.route('/<mol_id>', methods=['GET','DELETE'])
 def single_Mol(mol_id):
     response_object = {'status':'succss'}
-    # delete the mol
+    # delete the molecule
     if request.method == 'DELETE':
         remove_mol(mol_id)
         response_object['message'] = 'molecule Removed!'
